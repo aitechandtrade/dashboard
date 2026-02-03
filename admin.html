@@ -2,18 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYSTEM CONTROL</title>
+    <title>SYSTEM HOST</title>
     <style>
         body { background: #111; color: white; font-family: monospace; padding: 30px; display: flex; flex-direction: column; align-items: center; }
         .panel { background: #222; padding: 20px; border-radius: 8px; width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #444; }
-        h3 { margin-top: 0; color: #888; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
         
         input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 10px; background: #000; color: #0f0; border: 1px solid #333; }
-        button { padding: 12px; width: 100%; cursor: pointer; border: none; font-weight: bold; margin-bottom: 5px; }
-        .btn-go { background: #00f3ff; color: black; }
-        .btn-stop { background: #ff0055; color: white; }
+        button { padding: 12px; width: 100%; cursor: pointer; border: none; font-weight: bold; margin-bottom: 5px; background: #00f3ff; color: black; }
         
-        /* Note Item Style */
         .note-item { 
             display: flex; justify-content: space-between; align-items: center;
             background: #000; padding: 10px; border: 1px solid #333; 
@@ -25,26 +21,20 @@
 <body>
 
     <div class="panel">
-        <h3>AUDIO FEED</h3>
+        <h3>AUDIO SOURCE</h3>
         <input type="text" id="yt-url" placeholder="Paste YouTube Link or Playlist">
-        <button class="btn-go" onclick="loadUserLink()">LOAD LINK</button>
-        
-        <div id="player" style="margin-top: 10px; height: 100px; width: 100%; border-radius:4px;"></div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="btn-stop" onclick="mediaCmd('pause')" style="background:#333">PAUSE</button>
-            <button class="btn-stop" onclick="mediaCmd('play')" style="background:#333">PLAY</button>
+        <button onclick="loadUserLink()">LOAD LINK</button>
+        <div style="font-size: 0.8rem; color: #888; margin-top: 10px; text-align: center;">
+            *Leave this tab open. Control playback from iPad.*
         </div>
+        <div id="player" style="margin-top: 10px; height: 100px; width: 100%;"></div>
     </div>
 
     <div class="panel">
-        <h3>TASKS</h3>
+        <h3>TASK MANAGER</h3>
         <input type="text" id="noteIn" placeholder="New Task...">
-        <button class="btn-go" onclick="addNote()">ADD TASK</button>
-        
-        <div id="active-notes" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;">
-            <div style="text-align:center; color:#555;">Loading tasks...</div>
-        </div>
+        <button onclick="addNote()">ADD TASK</button>
+        <div id="active-notes" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;"></div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -66,7 +56,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- MEDIA ---
+        // --- YOUTUBE LOGIC ---
         window.player = null;
         window.onYouTubeIframeAPIReady = function() {
             window.player = new YT.Player('player', {
@@ -84,14 +74,23 @@
                 const vidId = url.split('v=')[1].split('&')[0];
                 window.player.loadVideoById(vidId);
             }
-            set(ref(db, 'media'), { action: 'play', timestamp: Date.now() });
         }
 
-        window.mediaCmd = (act) => {
-            if(act === 'pause') window.player.pauseVideo();
-            if(act === 'play') window.player.playVideo();
-            set(ref(db, 'media'), { action: act, timestamp: Date.now() });
-        }
+        // --- LISTEN FOR IPAD COMMANDS ---
+        onValue(ref(db, 'media'), (snap) => {
+            if(snap.exists() && window.player && window.player.playVideo) {
+                const action = snap.val().action;
+                const cmdTime = snap.val().timestamp;
+                const now = Date.now();
+                
+                // Only execute if the command is "fresh" (less than 2 seconds old)
+                // This prevents old commands from firing when you reload the page
+                if (now - cmdTime < 2000) {
+                    if (action === 'pause') window.player.pauseVideo();
+                    if (action === 'play') window.player.playVideo();
+                }
+            }
+        });
 
         // --- NOTES LOGIC ---
         window.addNote = () => {
@@ -99,31 +98,20 @@
             if(val) { push(ref(db, 'notes'), val); document.getElementById('noteIn').value = ''; }
         }
 
-        // Display list so you can delete items
         onValue(ref(db, 'notes'), (snap) => {
             const list = document.getElementById('active-notes');
             list.innerHTML = '';
-            
             if(snap.exists()) {
                 snap.forEach(child => {
                     const div = document.createElement('div');
                     div.className = 'note-item';
-                    // We pass the firebase Key (child.key) to the delete function
-                    div.innerHTML = `
-                        <span>${child.val()}</span> 
-                        <span class="del-btn" onclick="del('${child.key}')">X</span>
-                    `;
+                    div.innerHTML = `<span>${child.val()}</span> <span class="del-btn" onclick="del('${child.key}')">X</span>`;
                     list.appendChild(div);
                 });
-            } else {
-                list.innerHTML = '<div style="text-align:center; color:#555;">No active tasks</div>';
             }
         });
 
-        // Expose delete to HTML
-        window.del = (key) => {
-            remove(ref(db, 'notes/' + key));
-        }
+        window.del = (key) => remove(ref(db, 'notes/' + key));
 
     </script>
 </body>
