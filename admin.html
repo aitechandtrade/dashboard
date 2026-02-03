@@ -2,49 +2,323 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYSTEM HOST</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM HOST - Admin Panel</title>
     <style>
-        body { background: #111; color: white; font-family: monospace; padding: 30px; display: flex; flex-direction: column; align-items: center; }
-        .panel { background: #222; padding: 20px; border-radius: 8px; width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #444; }
+        * { box-sizing: border-box; }
+        body { 
+            background: #0a0a0a; 
+            color: #e0e0e0; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            padding: 20px; 
+            margin: 0;
+            min-height: 100vh;
+        }
         
-        input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 10px; background: #000; color: #0f0; border: 1px solid #333; }
-        button { padding: 12px; width: 100%; cursor: pointer; border: none; font-weight: bold; margin-bottom: 5px; background: #00f3ff; color: black; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .panel { 
+            background: linear-gradient(145deg, #1a1a2e, #16213e); 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        h2 { 
+            margin: 0 0 20px 0; 
+            font-size: 1.1rem; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00f3ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #00f3ff;
+            border-radius: 2px;
+        }
+        
+        input, select { 
+            width: 100%; 
+            padding: 14px; 
+            margin-bottom: 12px; 
+            background: rgba(0,0,0,0.4); 
+            color: #fff; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00f3ff;
+            box-shadow: 0 0 0 3px rgba(0,243,255,0.1);
+        }
+        
+        button { 
+            padding: 14px 24px; 
+            cursor: pointer; 
+            border: none; 
+            font-weight: 600; 
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00f3ff, #0099cc);
+            color: #000;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,243,255,0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff0055, #cc0044);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.75rem;
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 4px 15px rgba(255,0,85,0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
         
         .note-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #000; padding: 10px; border: 1px solid #333; 
-            margin-bottom: 5px; font-size: 0.9rem; color: #ccc;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: rgba(0,0,0,0.3); 
+            padding: 14px 16px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            font-size: 0.95rem; 
+            color: #ddd;
+            border-left: 3px solid #bc13fe;
+            animation: slideIn 0.3s ease;
         }
-        .del-btn { color: #ff0055; cursor: pointer; font-weight: bold; padding: 0 10px; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .note-item:hover {
+            background: rgba(0,0,0,0.4);
+        }
+        
+        .empty-state {
+            text-align: center; 
+            color: #555; 
+            padding: 30px;
+            font-style: italic;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .color-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: white;
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-online { background: rgba(0,255,100,0.2); color: #00ff64; }
+        .status-offline { background: rgba(255,0,0,0.2); color: #ff4444; }
+        
+        #player { 
+            margin-top: 15px; 
+            height: 180px; 
+            width: 100%; 
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-size: 0.8rem;
+            color: #888;
+            margin: 15px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00f3ff, #0099cc);
+            color: #000;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .input-group button {
+            width: auto;
+            white-space: nowrap;
+        }
     </style>
+<base target="_blank">
 </head>
 <body>
-
-    <div class="panel">
-        <h3>AUDIO SOURCE</h3>
-        <input type="text" id="yt-url" placeholder="Paste YouTube Link (Playlist Recommended)">
-        <button onclick="loadUserLink()">LOAD LINK</button>
-        <div style="font-size: 0.8rem; color: #888; margin-top: 10px; text-align: center;">
-            *Leave this tab open. Control playback from iPad.*
+    <div class="container">
+        <!-- AUDIO SOURCE PANEL -->
+        <div class="panel">
+            <h2>Audio Source <span id="media-status" class="status-badge status-offline">OFFLINE</span></h2>
+            <input type="text" id="yt-url" placeholder="Paste YouTube Link or Playlist URL">
+            <button class="btn-primary" onclick="loadUserLink()">LOAD & PLAY</button>
+            <div id="player"></div>
+            <p style="font-size: 0.85rem; color: #888; margin-top: 15px; text-align: center;">
+                Leave this tab open. Control playback from the dashboard.
+            </p>
         </div>
-        <div id="player" style="margin-top: 10px; height: 100px; width: 100%;"></div>
+
+        <!-- TASK MANAGER PANEL -->
+        <div class="panel">
+            <h2>Task Manager</h2>
+            <div class="input-group">
+                <input type="text" id="noteIn" placeholder="Enter new task..." onkeypress="if(event.key==='Enter')addNote()">
+                <button class="btn-primary" onclick="addNote()" style="width: auto;">ADD</button>
+            </div>
+            <div id="active-notes" style="margin-top: 20px;">
+                <div class="empty-state">Loading tasks...</div>
+            </div>
+        </div>
+
+        <!-- CUSTOMIZATION PANEL -->
+        <div class="panel">
+            <h2>Dashboard Settings</h2>
+            
+            <div class="section-title">Page Title</div>
+            <input type="text" id="page-title" placeholder="Dashboard Title" value="NEON HUD">
+            
+            <div class="section-title">Notes Section Title</div>
+            <input type="text" id="notes-title" placeholder="Notes Header" value="MISSION LOG">
+            
+            <div class="section-title">Calendar URL</div>
+            <input type="text" id="calendar-url" placeholder="Google Calendar Embed URL">
+            
+            <div class="section-title">Accent Color</div>
+            <div class="color-grid" id="color-picker">
+                <div class="color-option active" style="background: #00f3ff" data-color="#00f3ff"></div>
+                <div class="color-option" style="background: #bc13fe" data-color="#bc13fe"></div>
+                <div class="color-option" style="background: #ff0055" data-color="#ff0055"></div>
+                <div class="color-option" style="background: #00ff64" data-color="#00ff64"></div>
+                <div class="color-option" style="background: #ffaa00" data-color="#ffaa00"></div>
+            </div>
+            
+            <div class="section-title">Theme</div>
+            <select id="theme-select">
+                <option value="dark">Dark Nebula</option>
+                <option value="cyber">Cyberpunk</option>
+                <option value="ocean">Deep Ocean</option>
+                <option value="matrix">Matrix</option>
+            </select>
+            
+            <button class="btn-secondary" onclick="saveSettings()">Save Settings</button>
+        </div>
+
+        <!-- CONNECTION STATUS PANEL -->
+        <div class="panel">
+            <h2>System Status</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <span>Firebase Connection</span>
+                    <span id="fb-status" class="status-badge status-offline">CONNECTING</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <span>YouTube Player</span>
+                    <span id="yt-status" class="status-badge status-offline">INITIALIZING</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <span>Active Tasks</span>
+                    <span id="task-count" style="font-size: 1.2rem; font-weight: bold; color: #00f3ff;">0</span>
+                </div>
+            </div>
+            <button class="btn-danger" onclick="clearAllNotes()" style="width: 100%; margin-top: 20px;">Clear All Tasks</button>
+        </div>
     </div>
 
-    <div class="panel">
-        <h3>TASK MANAGER</h3>
-        <input type="text" id="noteIn" placeholder="New Task...">
-        <button onclick="addNote()">ADD TASK</button>
-        
-        <div id="active-notes" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;">
-            <div style="text-align:center; color:#555;">Loading tasks...</div>
-        </div>
-    </div>
+    <div id="toast" class="toast">Settings saved!</div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, remove, onValue, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDC33-WXrZ50uHjjLlW9qhwT7REdSQ6M3s",
@@ -59,62 +333,184 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Update Firebase status
+        const connectedRef = ref(db, '.info/connected');
+        onValue(connectedRef, (snap) => {
+            const status = document.getElementById('fb-status');
+            if (snap.val() === true) {
+                status.textContent = 'ONLINE';
+                status.className = 'status-badge status-online';
+            } else {
+                status.textContent = 'OFFLINE';
+                status.className = 'status-badge status-offline';
+            }
+        });
+
         // --- YOUTUBE LOGIC ---
         window.player = null;
         window.onYouTubeIframeAPIReady = function() {
             window.player = new YT.Player('player', {
-                height: '100%', width: '100%',
-                playerVars: { 'playsinline': 1 }
+                height: '180',
+                width: '100%',
+                playerVars: { 
+                    'playsinline': 1,
+                    'controls': 1,
+                    'rel': 0
+                }
             });
+            document.getElementById('yt-status').textContent = 'READY';
+            document.getElementById('yt-status').className = 'status-badge status-online';
         }
 
         window.loadUserLink = () => {
-            const url = document.getElementById('yt-url').value;
-            if(url.includes('list=')) {
-                const listId = url.split('list=')[1].split('&')[0];
-                window.player.loadPlaylist({list:listId, listType:'playlist'});
-            } else if(url.includes('v=')) {
-                const vidId = url.split('v=')[1].split('&')[0];
-                window.player.loadVideoById(vidId);
+            const url = document.getElementById('yt-url').value.trim();
+            if (!url) return;
+            
+            if (window.player && window.player.loadPlaylist) {
+                if (url.includes('list=')) {
+                    const listId = url.split('list=')[1].split('&')[0];
+                    window.player.loadPlaylist({list: listId, listType: 'playlist'});
+                } else if (url.includes('v=')) {
+                    const vidId = url.split('v=')[1].split('&')[0];
+                    window.player.loadVideoById(vidId);
+                } else if (url.includes('youtu.be/')) {
+                    const vidId = url.split('youtu.be/')[1].split('?')[0];
+                    window.player.loadVideoById(vidId);
+                }
+                document.getElementById('media-status').textContent = 'PLAYING';
+                document.getElementById('media-status').className = 'status-badge status-online';
             }
         }
 
-        // --- LISTEN FOR IPAD COMMANDS ---
+        // --- LISTEN FOR REMOTE COMMANDS ---
         onValue(ref(db, 'media'), (snap) => {
-            if(snap.exists() && window.player && window.player.playVideo) {
-                const action = snap.val().action;
-                const cmdTime = snap.val().timestamp;
-                // Only execute if command is fresh (< 2 seconds old)
-                if (Date.now() - cmdTime < 2000) {
-                    if (action === 'pause') window.player.pauseVideo();
-                    if (action === 'play') window.player.playVideo();
+            if (snap.exists() && window.player && window.player.playVideo) {
+                const data = snap.val();
+                const cmdTime = data.timestamp || 0;
+                if (Date.now() - cmdTime < 3000) {
+                    if (data.action === 'pause') window.player.pauseVideo();
+                    if (data.action === 'play') window.player.playVideo();
                 }
             }
         });
 
         // --- NOTES LOGIC ---
         window.addNote = () => {
-            const val = document.getElementById('noteIn').value;
-            if(val) { push(ref(db, 'notes'), val); document.getElementById('noteIn').value = ''; }
+            const input = document.getElementById('noteIn');
+            const val = input.value.trim();
+            if (val) { 
+                push(ref(db, 'notes'), { 
+                    text: val, 
+                    created: Date.now() 
+                }); 
+                input.value = ''; 
+            }
         }
 
         onValue(ref(db, 'notes'), (snap) => {
             const list = document.getElementById('active-notes');
             list.innerHTML = '';
-            if(snap.exists()) {
+            let count = 0;
+            
+            if (snap.exists()) {
+                const notes = [];
                 snap.forEach(child => {
+                    const data = child.val();
+                    notes.push({
+                        key: child.key,
+                        text: typeof data === 'string' ? data : (data.text || ''),
+                        created: data.created || 0
+                    });
+                    count++;
+                });
+                
+                // Sort by newest first
+                notes.sort((a, b) => b.created - a.created);
+                
+                notes.forEach(note => {
                     const div = document.createElement('div');
                     div.className = 'note-item';
-                    div.innerHTML = `<span>${child.val()}</span> <span class="del-btn" onclick="del('${child.key}')">X</span>`;
+                    div.innerHTML = `
+                        <span>${escapeHtml(note.text)}</span>
+                        <button class="btn-danger" data-key="${note.key}">DELETE</button>
+                    `;
                     list.appendChild(div);
                 });
+                
+                // Add delete handlers
+                list.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        remove(ref(db, 'notes/' + btn.dataset.key));
+                    });
+                });
             } else {
-                list.innerHTML = '<div style="text-align:center; color:#555;">No active tasks</div>';
+                list.innerHTML = '<div class="empty-state">No active tasks</div>';
+            }
+            
+            document.getElementById('task-count').textContent = count;
+        });
+
+        window.clearAllNotes = () => {
+            if (confirm('Are you sure you want to delete all tasks?')) {
+                set(ref(db, 'notes'), null);
+            }
+        }
+
+        // --- SETTINGS LOGIC ---
+        const colorOptions = document.querySelectorAll('.color-option');
+        let selectedColor = '#00f3ff';
+        
+        colorOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                colorOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                selectedColor = opt.dataset.color;
+            });
+        });
+
+        window.saveSettings = () => {
+            const settings = {
+                pageTitle: document.getElementById('page-title').value || 'NEON HUD',
+                notesTitle: document.getElementById('notes-title').value || 'MISSION LOG',
+                calendarUrl: document.getElementById('calendar-url').value || '',
+                accentColor: selectedColor,
+                theme: document.getElementById('theme-select').value,
+                updated: Date.now()
+            };
+            
+            set(ref(db, 'settings'), settings);
+            showToast('Settings saved successfully!');
+        }
+
+        // Load existing settings
+        onValue(ref(db, 'settings'), (snap) => {
+            if (snap.exists()) {
+                const s = snap.val();
+                if (s.pageTitle) document.getElementById('page-title').value = s.pageTitle;
+                if (s.notesTitle) document.getElementById('notes-title').value = s.notesTitle;
+                if (s.calendarUrl) document.getElementById('calendar-url').value = s.calendarUrl;
+                if (s.theme) document.getElementById('theme-select').value = s.theme;
+                if (s.accentColor) {
+                    selectedColor = s.accentColor;
+                    colorOptions.forEach(o => {
+                        o.classList.toggle('active', o.dataset.color === s.accentColor);
+                    });
+                }
             }
         });
 
-        window.del = (key) => remove(ref(db, 'notes/' + key));
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
 </body>
 </html>
