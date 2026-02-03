@@ -3,94 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Bento Dashboard</title>
     <style>
         :root { 
-            --bg: #000000; 
-            --card-bg: #111111; 
-            --border: #333; 
-            --text-main: #ffffff;
-            --text-muted: #888888;
-            --accent: #3a86ff; /* Nice blue accent */
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #e0e0e0;
+            --accent: #ff0055; /* Fun accent color */
         }
         
         body { 
-            background: var(--bg); color: var(--text-main); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; padding: 20px; height: 100vh; box-sizing: border-box;
+            background: var(--bg-gradient); color: var(--text); 
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            margin: 0; padding: 25px; height: 100vh; box-sizing: border-box;
             display: grid; 
-            grid-template-columns: 350px 1fr; 
-            grid-template-rows: 140px 140px 1fr; 
+            grid-template-columns: 320px 1fr; /* Left column fixed, Right column fills rest */
+            grid-template-rows: 140px 120px 1fr; /* Rows for Time, Media, Notes */
             gap: 20px;
         }
 
-        .card { 
-            background: var(--card-bg); 
+        .bento-box { 
+            background: var(--glass); 
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border); 
-            border-radius: 12px; 
+            border-radius: 24px; 
             padding: 20px; 
-            position: relative;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; 
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
         }
-
-        /* 1. CLOCK (Top Left) */
-        #clock-card { justify-content: center; align-items: center; }
-        #clock { font-size: 3.5rem; font-weight: 700; letter-spacing: -2px; }
-        #date { font-size: 1rem; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
-
-        /* 2. TIMER (Middle Left) */
-        #timer-card { justify-content: center; align-items: center; }
-        #timer-display { font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-        #timer-label { font-size: 0.8rem; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 5px; }
-        /* When timer is active, make it blue */
-        .timer-active { color: var(--accent); }
-
-        /* 3. TASKS (Bottom Left) */
-        #notes-card { grid-row: 3 / 4; overflow-y: hidden; }
-        .card-header { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px; display: flex; justify-content: space-between; }
         
+        /* 1. CLOCK (Top Left) */
+        #clock-box { justify-content: center; align-items: flex-start; padding-left: 30px; }
+        #clock { font-size: 3.5rem; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+        #ampm { font-size: 1rem; font-weight: bold; color: var(--accent); margin-left: 5px; }
+        #date { font-size: 1rem; opacity: 0.6; margin-top: 5px; font-weight: 500; }
+
+        /* 2. MEDIA CONTROL (Middle Left) */
+        #media-box { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 30px; }
+        .media-status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; }
+        .controls { display: flex; gap: 15px; }
+        .ctrl-btn { 
+            background: white; color: black; border: none; width: 40px; height: 40px; 
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: 0.2s;
+        }
+        .ctrl-btn:active { transform: scale(0.9); background: var(--accent); color: white; }
+
+        /* 3. NOTES (Bottom Left - Tall) */
+        #notes-box { grid-row: 3 / 4; position: relative; }
+        h3 { margin: 0 0 15px 0; font-size: 0.9rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
         #notes-list { overflow-y: auto; height: 100%; padding-right: 5px; }
+        
         .note { 
-            background: #1a1a1a; 
-            padding: 12px; 
-            border-radius: 8px; 
-            margin-bottom: 8px; 
-            font-size: 0.95rem; 
-            border-left: 3px solid var(--accent);
-            line-height: 1.4;
+            background: rgba(255,255,255,0.08); 
+            padding: 15px; border-radius: 16px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4;
+            border-left: 4px solid var(--accent); animation: popIn 0.3s ease;
         }
 
-        /* 4. CALENDAR (Right Side) */
-        #calendar-card { grid-column: 2 / 3; grid-row: 1 / 4; padding: 0; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1); }
+        /* 4. CALENDAR (Right Side - Huge) */
+        #calendar-box { grid-column: 2 / 3; grid-row: 1 / 4; padding: 0; }
+        iframe { width: 100%; height: 100%; border: none; filter: invert(1) hue-rotate(180deg) brightness(0.85); }
+        
+        /* 5. TIMER OVERLAY (Floating on Clock) */
+        #timer-pill {
+            position: absolute; top: 20px; right: 20px; 
+            background: var(--accent); color: white; padding: 5px 12px; 
+            border-radius: 20px; font-weight: bold; font-size: 0.9rem;
+            display: none; box-shadow: 0 4px 12px rgba(255, 0, 85, 0.4);
+        }
 
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="card" id="clock-card">
-        <div id="clock">00:00</div>
-        <div id="date">Loading...</div>
+    <div class="bento-box" id="clock-box">
+        <div id="timer-pill">25:00</div> <div style="display:flex; align-items:baseline;">
+            <div id="clock">12:00</div>
+            <div id="ampm">PM</div>
+        </div>
+        <div id="date">Loading Date...</div>
     </div>
 
-    <div class="card" id="timer-card">
-        <div id="timer-display">--:--</div>
-        <div id="timer-label">No Active Timer</div>
+    <div class="bento-box" id="media-box">
+        <div>
+            <div style="font-weight:bold; font-size: 1.1rem;">Laptop Audio</div>
+            <div class="media-status" id="media-status">CONNECTED</div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn" onclick="controlMedia('pause')">⏸</button>
+            <button class="ctrl-btn" onclick="controlMedia('play')">▶</button>
+        </div>
     </div>
 
-    <div class="card" id="notes-card">
-        <div class="card-header">Priority Tasks</div>
-        <div id="notes-list">
-            </div>
+    <div class="bento-box" id="notes-box">
+        <h3>My Board</h3>
+        <div id="notes-list"></div>
     </div>
 
-    <div class="card" id="calendar-card">
+    <div class="bento-box" id="calendar-box">
         <iframe src="https://calendar.google.com/calendar/embed?src=abdullahimtiazalishaikh%40gmail.com&ctz=Asia%2FDubai&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0"></iframe>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDC33-WXrZ50uHjjLlW9qhwT7REdSQ6M3s",
@@ -105,67 +125,60 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // CLOCK
+        // --- MEDIA CONTROL ---
+        window.controlMedia = (action) => {
+            // Send command to Firebase
+            set(ref(db, 'media'), { action: action, timestamp: Date.now() });
+        };
+
+        // --- CLOCK (12 Hour) ---
         setInterval(() => {
             const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-            const options = { weekday: 'long', month: 'short', day: 'numeric' };
-            document.getElementById('date').innerText = now.toLocaleDateString('en-US', options);
+            // Get 12h time string
+            let timeString = now.toLocaleTimeString('en-US', {hour: 'numeric', minute:'2-digit', hour12: true});
+            // Split "7:12 PM" into "7:12" and "PM"
+            const [time, period] = timeString.split(' ');
+            document.getElementById('clock').innerText = time;
+            document.getElementById('ampm').innerText = period;
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
         }, 1000);
 
-        // NOTES (Listens to DB changes automatically)
+        // --- NOTES SYNC ---
         onValue(ref(db, 'notes'), (snap) => {
             const list = document.getElementById('notes-list');
             list.innerHTML = '';
             if(snap.exists()) {
-                // Convert object to array so we can reverse it (newest first)
                 const notesArray = [];
-                snap.forEach(child => {
-                    notesArray.push(child.val());
-                });
-                
+                snap.forEach(child => notesArray.push(child.val()));
                 notesArray.reverse().forEach(txt => {
-                    const div = document.createElement('div');
-                    div.className = 'note';
-                    div.innerText = txt;
-                    list.appendChild(div);
+                    const d = document.createElement('div'); d.className = 'note'; d.innerText = txt;
+                    list.appendChild(d);
                 });
-            } else {
-                list.innerHTML = '<div style="color: #444; text-align:center; margin-top: 20px;">All caught up.</div>';
             }
         });
 
-        // TIMER
+        // --- TIMER SYNC ---
         let timerInt;
         onValue(ref(db, 'timer'), (snap) => {
             clearInterval(timerInt);
-            const display = document.getElementById('timer-display');
-            const label = document.getElementById('timer-label');
-            
+            const pill = document.getElementById('timer-pill');
             if(snap.exists() && snap.val().endTime) {
                 const data = snap.val();
-                label.innerText = "TIME REMAINING";
-                display.classList.add('timer-active');
-                
+                pill.style.display = 'block';
                 timerInt = setInterval(() => {
                     const diff = data.endTime - Date.now();
                     if(diff <= 0) {
                         clearInterval(timerInt);
-                        display.innerText = "00:00";
-                        display.classList.remove('timer-active');
-                        display.style.color = "#06d6a0"; // Green when done
-                        label.innerText = "SESSION COMPLETE";
+                        pill.innerText = "DONE!";
+                        pill.style.background = "#00ff41";
                     } else {
                         const m = Math.floor(diff / 60000);
                         const s = Math.floor((diff % 60000) / 1000);
-                        display.innerText = `${m}:${s<10?'0':''}${s}`;
+                        pill.innerText = `${m}:${s<10?'0':''}${s}`;
                     }
                 }, 1000);
             } else {
-                display.innerText = "--:--";
-                display.classList.remove('timer-active');
-                display.style.color = "inherit";
-                label.innerText = "IDLE";
+                pill.style.display = 'none';
             }
         });
     </script>
