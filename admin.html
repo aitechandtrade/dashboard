@@ -5,68 +5,66 @@
     <title>CMD CENTER</title>
     <style>
         body { 
-            background: #0f0f11; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            display: flex; flex-direction: column; align-items: center; padding: 20px; 
+            background: #121212; color: white; font-family: -apple-system, sans-serif; 
+            padding: 40px; display: flex; flex-direction: column; align-items: center; 
         }
-        h2 { color: #fff; letter-spacing: 1px; margin-bottom: 20px; }
-        
         .panel { 
-            background: #1e1e24; width: 100%; max-width: 400px; 
-            padding: 20px; border-radius: 12px; margin-bottom: 20px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #333;
+            background: #1e1e1e; border: 1px solid #333; padding: 20px; 
+            border-radius: 12px; width: 100%; max-width: 450px; margin-bottom: 20px;
         }
+        h3 { margin-top: 0; color: #888; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
         
-        h3 { margin-top: 0; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; }
+        /* Inputs & Buttons */
+        input { 
+            width: 100%; padding: 12px; background: #000; border: 1px solid #444; 
+            color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px;
+        }
+        button { 
+            width: 100%; padding: 12px; border: none; border-radius: 6px; 
+            cursor: pointer; font-weight: bold; margin-bottom: 5px; 
+        }
+        .btn-green { background: #00ff41; color: black; }
+        .btn-red { background: #ff3e3e; color: white; }
+        .btn-blue { background: #3a86ff; color: white; }
 
-        /* Timer Controls */
-        .timer-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input[type="number"] { width: 60px; padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; text-align: center; }
-        
-        button { border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-blue { background: #3a86ff; color: white; flex: 1; }
-        .btn-blue:hover { background: #2667cc; }
-        .btn-red { background: #ef233c; color: white; width: 100%; }
-        .btn-red:hover { background: #d90429; }
-
-        /* Note Controls */
-        input[type="text"] { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
-        .btn-green { background: #06d6a0; color: #000; width: 100%; }
-
-        /* Active Notes List */
-        #active-notes { margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+        /* Notes List */
         .note-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: #111; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;
+            display: flex; justify-content: space-between; padding: 10px; 
+            background: #121212; margin-bottom: 5px; border-radius: 6px; font-size: 0.9rem;
         }
-        .delete-btn { background: #333; color: #ff4444; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; }
     </style>
 </head>
 <body>
 
-    <h2>CONTROLLER</h2>
-
     <div class="panel">
-        <h3>Timer</h3>
-        <div class="timer-row">
-            <input type="number" id="customTime" placeholder="Min" value="45">
-            <button class="btn-blue" onclick="setCustomTimer()">START</button>
+        <h3>1. Music Source (YouTube)</h3>
+        <input type="text" id="yt-url" placeholder="Paste YouTube Link (e.g. Lofi Girl)">
+        <button class="btn-blue" onclick="loadVideo()">LOAD VIDEO</button>
+        <div id="player-container" style="margin-top:10px; height: 100px; border-radius: 8px; overflow:hidden;">
+            <div id="player"></div> 
         </div>
-        <div class="timer-row">
-            <button class="btn-blue" style="background: #2b2d42;" onclick="setTimer(25)">25m</button>
-            <button class="btn-blue" style="background: #2b2d42;" onclick="setTimer(5)">5m</button>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+            *Keep this tab open for music to play.
         </div>
-        <button class="btn-red" onclick="stopTimer()">STOP / RESET</button>
     </div>
 
     <div class="panel">
-        <h3>Tasks</h3>
-        <input type="text" id="noteInput" placeholder="New task...">
-        <button class="btn-green" onclick="addNote()">ADD TASK</button>
-
-        <div id="active-notes">
-            <div style="text-align:center; color: #555; font-size: 0.8rem;">Loading tasks...</div>
+        <h3>2. Focus Timer</h3>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="customMins" value="25" style="width: 70px; text-align:center;">
+            <button class="btn-green" onclick="startTimer()">START TIMER</button>
         </div>
+        <button class="btn-red" onclick="stopTimer()">STOP</button>
     </div>
+
+    <div class="panel">
+        <h3>3. Sticky Notes</h3>
+        <input type="text" id="noteInput" placeholder="New Task...">
+        <button class="btn-green" onclick="addNote()">ADD NOTE</button>
+        <div id="active-notes" style="margin-top: 15px;"></div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -85,54 +83,76 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- Timer Functions ---
-        window.setCustomTimer = () => {
-            const mins = document.getElementById('customTime').value;
-            if(mins) setTimer(mins);
-        };
-        
-        window.setTimer = (mins) => {
-            const endTime = Date.now() + (mins * 60000);
-            set(ref(db, 'timer'), { endTime: endTime, label: 'FOCUS MODE' });
-        };
-        
-        window.stopTimer = () => set(ref(db, 'timer'), null);
+        // --- YOUTUBE LOGIC ---
+        window.player = null;
+        window.onYouTubeIframeAPIReady = function() {
+            window.player = new YT.Player('player', {
+                height: '100%', width: '100%',
+                playerVars: { 'playsinline': 1 },
+                events: { 'onReady': onPlayerReady }
+            });
+        }
 
-        // --- Note Functions ---
-        window.addNote = () => {
-            const input = document.getElementById('noteInput');
-            if(input.value) {
-                push(ref(db, 'notes'), input.value);
-                input.value = '';
-            }
-        };
+        function onPlayerReady(event) { console.log("Player Ready"); }
 
-        // Listen to notes so we can delete them individually
-        onValue(ref(db, 'notes'), (snapshot) => {
-            const list = document.getElementById('active-notes');
-            list.innerHTML = '';
+        window.loadVideo = () => {
+            const url = document.getElementById('yt-url').value;
+            // Extract Video ID from URL
+            let vidId = '';
+            if(url.includes('v=')) vidId = url.split('v=')[1].split('&')[0];
+            else if(url.includes('youtu.be/')) vidId = url.split('youtu.be/')[1];
             
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const id = childSnapshot.key;
-                    const text = childSnapshot.val();
+            if(vidId && window.player) {
+                window.player.loadVideoById(vidId);
+            } else { alert("Invalid YouTube URL"); }
+        }
 
-                    const item = document.createElement('div');
-                    item.className = 'note-item';
-                    item.innerHTML = `
-                        <span>${text}</span>
-                        <button class="delete-btn" onclick="deleteNote('${id}')">✕</button>
-                    `;
-                    list.appendChild(item);
-                });
-            } else {
-                list.innerHTML = '<div style="text-align:center; color: #555; padding:10px;">No active tasks</div>';
+        // LISTEN FOR COMMANDS FROM IPAD
+        onValue(ref(db, 'media'), (snap) => {
+            if(snap.exists() && window.player && window.player.getPlayerState) {
+                const action = snap.val().action;
+                // Check timestamp to avoid re-triggering old commands
+                const cmdTime = snap.val().timestamp;
+                const now = Date.now();
+                
+                if (now - cmdTime < 2000) { // Only execute if command is fresh (<2 sec old)
+                    if (action === 'pause') window.player.pauseVideo();
+                    if (action === 'play') window.player.playVideo();
+                }
             }
         });
 
-        window.deleteNote = (id) => {
-            remove(ref(db, 'notes/' + id));
+
+        // --- TIMER LOGIC ---
+        window.startTimer = () => {
+            const mins = document.getElementById('customMins').value;
+            set(ref(db, 'timer'), { endTime: Date.now() + (mins*60000) });
         };
+        window.stopTimer = () => set(ref(db, 'timer'), null);
+
+
+        // --- NOTES LOGIC ---
+        window.addNote = () => {
+            const val = document.getElementById('noteInput').value;
+            if(val) { push(ref(db, 'notes'), val); document.getElementById('noteInput').value = ''; }
+        };
+        
+        onValue(ref(db, 'notes'), (snap) => {
+            const list = document.getElementById('active-notes');
+            list.innerHTML = '';
+            if(snap.exists()) {
+                snap.forEach(child => {
+                    const div = document.createElement('div');
+                    div.className = 'note-item';
+                    div.innerHTML = `<span>${child.val()}</span> <span style="color:red; cursor:pointer;" onclick="del('${child.key}')">X</span>`;
+                    list.appendChild(div);
+                });
+            }
+        });
+
+        // Expose delete function to window
+        window.del = (key) => remove(ref(db, 'notes/'+key));
+
     </script>
 </body>
 </html>
