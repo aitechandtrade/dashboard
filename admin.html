@@ -113,37 +113,102 @@
             background: rgba(255,255,255,0.2);
         }
         
+        /* NEW CLEAN BUTTON STYLES */
         .btn-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
         }
         
-        .btn-grid button {
-            padding: 12px 8px;
-            font-size: 0.75rem;
+        .btn-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
         }
         
         .btn-cmd {
-            background: rgba(0, 243, 255, 0.15);
-            border: 1px solid rgba(0, 243, 255, 0.4);
-            color: #00f3ff;
+            padding: 14px 8px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .btn-cmd:hover {
-            background: rgba(0, 243, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            transform: translateY(-2px);
         }
         
+        .btn-cmd:active {
+            transform: scale(0.95);
+        }
+        
+        /* Media buttons - pink accent */
         .btn-media {
-            background: rgba(188, 19, 254, 0.15);
-            border: 1px solid rgba(188, 19, 254, 0.4);
-            color: #bc13fe;
+            background: linear-gradient(145deg, rgba(188, 19, 254, 0.25), rgba(188, 19, 254, 0.1));
+            border: 1px solid rgba(188, 19, 254, 0.5);
+            box-shadow: 0 4px 15px rgba(188, 19, 254, 0.15);
         }
         
         .btn-media:hover {
-            background: rgba(188, 19, 254, 0.3);
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+            background: linear-gradient(145deg, rgba(188, 19, 254, 0.4), rgba(188, 19, 254, 0.2));
+            box-shadow: 0 6px 20px rgba(188, 19, 254, 0.3);
+        }
+        
+        /* Play button - cyan accent */
+        .btn-play {
+            background: linear-gradient(145deg, rgba(0, 243, 255, 0.25), rgba(0, 243, 255, 0.1));
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 243, 255, 0.15);
+        }
+        
+        .btn-play:hover {
+            background: linear-gradient(145deg, rgba(0, 243, 255, 0.4), rgba(0, 243, 255, 0.2));
+            box-shadow: 0 6px 20px rgba(0, 243, 255, 0.3);
+        }
+        
+        /* Volume buttons - subtle */
+        .btn-vol {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ddd;
+        }
+        
+        .btn-vol:hover {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        /* App buttons - green accent */
+        .btn-app {
+            background: linear-gradient(145deg, rgba(0, 255, 100, 0.15), rgba(0, 255, 100, 0.05));
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            font-size: 1.1rem;
+            padding: 12px;
+        }
+        
+        .btn-app:hover {
+            background: linear-gradient(145deg, rgba(0, 255, 100, 0.3), rgba(0, 255, 100, 0.15));
+            box-shadow: 0 4px 15px rgba(0, 255, 100, 0.25);
+        }
+        
+        .section-label {
+            font-size: 0.65rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 15px 0 8px 0;
+        }
+        
+        .section-label:first-child {
+            margin-top: 0;
         }
         
         .note-item { 
@@ -278,36 +343,38 @@
             color: #00f3ff;
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="container">
         <!-- PC REMOTE CONTROL -->
         <div class="panel">
             <h2>PC Remote <span id="pc-status" class="status-badge status-offline">DISCONNECTED</span></h2>
-            <div class="section-title">Media Controls</div>
+            
+            <div class="section-label">Media Controls</div>
             <div class="btn-grid">
-                <button class="btn-media" onclick="sendCmd('previous')">⏮ Prev</button>
-                <button class="btn-media" onclick="sendCmd('pause')">⏸ Pause</button>
-                <button class="btn-media" onclick="sendCmd('play')">▶ Play</button>
-                <button class="btn-media" onclick="sendCmd('next')">⏭ Next</button>
+                <button class="btn-cmd btn-media" onclick="sendCmd('previous')">⏮ PREV</button>
+                <button class="btn-cmd btn-media" onclick="sendCmd('pause')">⏸ PAUSE</button>
+                <button class="btn-cmd btn-play" onclick="sendCmd('play')">▶ PLAY</button>
+                <button class="btn-cmd btn-media" onclick="sendCmd('next')">⏭ NEXT</button>
             </div>
             
-            <div class="section-title">Volume</div>
-            <div class="btn-grid">
-                <button class="btn-cmd" onclick="sendCmd('volume_down')">Vol -</button>
-                <button class="btn-cmd" onclick="sendCmd('mute')">🔇 Mute</button>
-                <button class="btn-cmd" onclick="sendCmd('volume_up')">Vol +</button>
+            <div class="section-label">Volume</div>
+            <div class="btn-grid-3">
+                <button class="btn-cmd btn-vol" onclick="sendCmd('volume_down')">VOL −</button>
+                <button class="btn-cmd btn-vol" onclick="sendCmd('mute')">🔇 MUTE</button>
+                <button class="btn-cmd btn-vol" onclick="sendCmd('volume_up')">VOL +</button>
             </div>
             
-            <div class="section-title">Quick Launch</div>
+            <div class="section-label">Quick Launch</div>
             <div class="btn-grid">
-                <button class="btn-cmd" onclick="sendCmd('spotify')">🎵 Spotify</button>
-                <button class="btn-cmd" onclick="sendCmd('terminal')">💻 Terminal</button>
-                <button class="btn-cmd" onclick="sendCmd('browser')">🌐 Browser</button>
-                <button class="btn-cmd" onclick="sendCmd('lock')">🔒 Lock</button>
+                <button class="btn-cmd btn-app" onclick="sendCmd('spotify')">🎵</button>
+                <button class="btn-cmd btn-app" onclick="sendCmd('terminal')">💻</button>
+                <button class="btn-cmd btn-app" onclick="sendCmd('browser')">🌐</button>
+                <button class="btn-cmd btn-app" onclick="sendCmd('lock')">🔒</button>
             </div>
             
-            <div class="section-title">Custom Command</div>
+            <div class="section-label">Custom Command</div>
             <div class="input-group">
                 <input type="text" id="custom-cmd" placeholder="e.g., notify-send 'Hello'">
                 <button class="btn-primary" onclick="sendCustomCmd()" style="width: auto;">RUN</button>
