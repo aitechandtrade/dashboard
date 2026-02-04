@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title-text">NEON HUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --neon-blue: #00f3ff;
+            --neon-pink: #bc13fe;
+            --glass: rgba(20, 20, 35, 0.85);
+            --border: 1px solid rgba(255, 255, 255, 0.15);
+            --bg-gradient-1: #0f0c29;
+            --bg-gradient-2: #302b63;
+            --bg-gradient-3: #24243e;
+            --bg-gradient-4: #141e30;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            height: 100vh; 
+            box-sizing: border-box;
+            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3), var(--bg-gradient-4));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white; 
+            font-family: 'Rajdhani', sans-serif;
+            display: grid; 
+            grid-template-columns: 360px 1fr; 
+            grid-template-rows: auto auto 1fr auto; 
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG { 
+            0% { background-position: 0% 50%; } 
+            50% { background-position: 100% 50%; } 
+            100% { background-position: 0% 50%; } 
+        }
+
+        .hud-box { 
+            background: var(--glass);
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            border: var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex; 
+            flex-direction: column;
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* CLOCK */
+        #clock-box { 
+            justify-content: center; 
+            align-items: center; 
+            border-left: 4px solid var(--neon-blue); 
+            min-height: 140px;
+        }
+        #clock { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5); 
+            margin: 0; 
+            line-height: 1;
+        }
+        #date { 
+            font-size: 1rem; 
+            letter-spacing: 2px; 
+            color: var(--neon-blue); 
+            text-transform: uppercase; 
+            margin-top: 10px; 
+        }
+
+        /* MEDIA REMOTE */
+        #media-box { 
+            border-left: 4px solid var(--neon-pink); 
+            justify-content: space-between;
+            min-height: auto;
+        }
+        .media-header {
+            font-family: 'Orbitron'; 
+            color: var(--neon-pink);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .media-status {
+            font-size: 0.75rem; 
+            color: #888;
+            margin-bottom: 15px;
+        }
+        .media-controls { 
+            display: flex; 
+            gap: 8px; 
+            width: 100%; 
+            flex-wrap: wrap;
+        }
+        .ctrl-btn {
+            flex: 1; 
+            min-width: 60px;
+            padding: 12px 8px; 
+            border: none; 
+            border-radius: 8px;
+            font-family: 'Orbitron'; 
+            font-weight: bold; 
+            cursor: pointer;
+            transition: all 0.2s; 
+            color: white; 
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+        .ctrl-btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-play { 
+            background: rgba(0, 243, 255, 0.2); 
+            border: 1px solid var(--neon-blue); 
+        }
+        .btn-play:hover {
+            background: rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+        .btn-pause { 
+            background: rgba(188, 19, 254, 0.2); 
+            border: 1px solid var(--neon-pink); 
+        }
+        .btn-pause:hover {
+            background: rgba(188, 19, 254, 0.4);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+        }
+        .btn-vol {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-vol:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-track {
+            background: rgba(0, 255, 100, 0.15);
+            border: 1px solid rgba(0, 255, 100, 0.5);
+        }
+        .btn-track:hover {
+            background: rgba(0, 255, 100, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.3);
+        }
+        .btn-sys {
+            background: rgba(255, 170, 0, 0.15);
+            border: 1px solid rgba(255, 170, 0, 0.5);
+        }
+        .btn-sys:hover {
+            background: rgba(255, 170, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.3);
+        }
+        .ctrl-btn:active { 
+            transform: scale(0.95); 
+        }
+
+        /* NOTES */
+        #notes-box { 
+            grid-row: 3 / 4; 
+            border-top: 4px solid var(--neon-blue); 
+            display: flex; 
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        h3 { 
+            margin: 0 0 15px 0; 
+            font-family: 'Orbitron'; 
+            letter-spacing: 2px; 
+            font-size: 0.95rem; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            padding-bottom: 12px; 
+            flex-shrink: 0; 
+            color: var(--neon-blue);
+        }
+        
+        #notes-container { 
+            flex: 1;
+            overflow-y: auto; 
+            padding-right: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            min-height: 0;
+        }
+        
+        #notes-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #notes-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        
+        #notes-container::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 3px;
+        }
+        
+        .note { 
+            background: rgba(255,255,255,0.08); 
+            padding: 16px; 
+            border-radius: 12px; 
+            border-left: 4px solid var(--neon-blue); 
+            font-size: 1.05rem; 
+            line-height: 1.5;
+            flex-shrink: 0;
+            animation: noteIn 0.3s ease;
+            word-wrap: break-word;
+        }
+        
+        @keyframes noteIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .note:hover {
+            background: rgba(255,255,255,0.12);
+        }
+        
+        .empty-notes {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        /* WEATHER WIDGET */
+        #weather-box {
+            grid-row: 4 / 5;
+            border-left: 4px solid #00ff64;
+            min-height: 100px;
+        }
+        
+        .weather-header {
+            font-family: 'Orbitron';
+            color: #00ff64;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .weather-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .weather-temp {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Orbitron';
+        }
+        
+        .weather-info {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .weather-location {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* CALENDAR */
+        #calendar-box { 
+            grid-column: 2 / 3; 
+            grid-row: 1 / 5; 
+            padding: 0; 
+            border: none; 
+            background: transparent;
+            min-height: 0;
+        }
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            filter: invert(1) hue-rotate(180deg) contrast(0.9) brightness(0.9); 
+        }
+
+        /* Theme variations */
+        body.theme-cyber {
+            --bg-gradient-1: #2d1b4e;
+            --bg-gradient-2: #1a0b2e;
+            --bg-gradient-3: #0d0221;
+            --bg-gradient-4: #45125e;
+        }
+        
+        body.theme-ocean {
+            --bg-gradient-1: #001f3f;
+            --bg-gradient-2: #003366;
+            --bg-gradient-3: #004080;
+            --bg-gradient-4: #001a33;
+        }
+        
+        body.theme-matrix {
+            --bg-gradient-1: #0d0208;
+            --bg-gradient-2: #003b00;
+            --bg-gradient-3: #008f11;
+            --bg-gradient-4: #0d0208;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto 1fr;
+                overflow-y: auto;
+            }
+            #calendar-box {
+                grid-column: 1;
+                grid-row: 5;
+                min-height: 500px;
+            }
+            #weather-box {
+                grid-row: 4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hud-box" id="clock-box">
+        <div id="clock">12:00</div>
+        <div id="date">LOADING...</div>
+    </div>
+
+    <div class="hud-box" id="media-box">
+        <div class="media-header">SYSTEM CONTROL</div>
+        <div class="media-status">PC MEDIA & SHORTCUTS</div>
+        <div class="media-controls">
+            <button class="ctrl-btn btn-track" onclick="remoteCmd('previous')">⏮</button>
+            <button class="ctrl-btn btn-pause" onclick="remoteCmd('pause')">⏸</button>
+            <button class="ctrl-btn btn-play" onclick="remoteCmd('play')">▶</button>
+            <button class="ctrl-btn btn-track" onclick="remoteCmd('next')">⏭</button>
+        </div>
+        <div class="media-controls" style="margin-top: 8px;">
+            <button class="ctrl-btn btn-vol" onclick="remoteCmd('volume_down')">Vol -</button>
+            <button class="ctrl-btn btn-vol" onclick="remoteCmd('mute')">🔇</button>
+            <button class="ctrl-btn btn-vol" onclick="remoteCmd('volume_up')">Vol +</button>
+        </div>
+        <div class="media-controls" style="margin-top: 8px;">
+            <button class="ctrl-btn btn-sys" onclick="remoteCmd('spotify')">🎵</button>
+            <button class="ctrl-btn btn-sys" onclick="remoteCmd('terminal')">💻</button>
+            <button class="ctrl-btn btn-sys" onclick="remoteCmd('browser')">🌐</button>
+            <button class="ctrl-btn btn-sys" onclick="remoteCmd('lock')">🔒</button>
+        </div>
+    </div>
+
+    <div class="hud-box" id="notes-box">
+        <h3 id="notes-title">MISSION LOG</h3>
+        <div id="notes-container">
+            <div class="empty-notes">Loading tasks...</div>
+        </div>
+    </div>
+
+    <div class="hud-box" id="weather-box">
+        <div class="weather-header">WEATHER</div>
+        <div class="weather-content">
+            <div class="weather-temp" id="weather-temp">--°</div>
+            <div>
+                <div class="weather-info" id="weather-desc">Loading...</div>
+                <div class="weather-location" id="weather-loc">Detecting location...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hud-box" id="calendar-box">
+        <iframe id="calendar-frame" src="https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&mode=WEEK"></iframe>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDC33-WXrZ50uHjjLlW9qhwT7REdSQ6M3s",
+            authDomain: "mydashboard-13727.firebaseapp.com",
+            databaseURL: "https://mydashboard-13727-default-rtdb.firebaseio.com",
+            projectId: "mydashboard-13727",
+            storageBucket: "mydashboard-13727.firebasestorage.app",
+            messagingSenderId: "389525920980",
+            appId: "1:389525920980:web:902256a3b7ca93b657ef41"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 1. Remote Control Logic
+        window.remoteCmd = (action) => {
+            set(ref(db, 'media'), { 
+                action: action, 
+                timestamp: Date.now() 
+            });
+        };
+
+        // 2. Clock
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12;
+            const m = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').innerText = `${h}:${m} ${ampm}`;
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // 3. Notes Sync
+        onValue(ref(db, 'notes'), (snap) => {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+            
+            if (snap.exists()) {
+                const notes = [];
+                
+                snap.forEach((child) => {
+                    const data = child.val();
+                    const noteText = typeof data === 'string' ? data : (data.text || '');
+                    const created = typeof data === 'object' ? (data.created || 0) : 0;
+                    
+                    if (noteText) {
+                        notes.push({
+                            key: child.key,
+                            text: noteText,
+                            created: created
+                        });
+                    }
+                });
+                
+                notes.sort((a, b) => b.created - a.created);
+                
+                if (notes.length > 0) {
+                    notes.forEach((note) => {
+                        const div = document.createElement('div');
+                        div.className = 'note';
+                        div.textContent = note.text;
+                        container.appendChild(div);
+                    });
+                } else {
+                    container.innerHTML = '<div class="empty-notes">No tasks yet</div>';
+                }
+            } else {
+                container.innerHTML = '<div class="empty-notes">No tasks yet</div>';
+            }
+        });
+
+        // 4. Settings Sync
+        onValue(ref(db, 'settings'), (snap) => {
+            if (snap.exists()) {
+                const settings = snap.val();
+                
+                if (settings.pageTitle) {
+                    document.title = settings.pageTitle;
+                    document.getElementById('page-title-text').textContent = settings.pageTitle;
+                }
+                
+                if (settings.notesTitle) {
+                    document.getElementById('notes-title').textContent = settings.notesTitle;
+                }
+                
+                if (settings.accentColor) {
+                    document.documentElement.style.setProperty('--neon-blue', settings.accentColor);
+                }
+                
+                if (settings.theme) {
+                    document.body.className = document.body.className.replace(/theme-\w+/, '');
+                    if (settings.theme !== 'dark') {
+                        document.body.classList.add(`theme-${settings.theme}`);
+                    }
+                }
+                
+                if (settings.calendarUrl) {
+                    const frame = document.getElementById('calendar-frame');
+                    let url = settings.calendarUrl;
+                    if (!url.includes('mode=')) {
+                        url += (url.includes('?') ? '&' : '?') + 'mode=WEEK';
+                    }
+                    if (frame.src !== url) {
+                        frame.src = url;
+                    }
+                }
+            }
+        });
+
+        // 5. Weather Widget
+        async function loadWeather() {
+            try {
+                // Get location from IP
+                const locRes = await fetch('https://ipapi.co/json/');
+                const locData = await locRes.json();
+                const city = locData.city;
+                const country = locData.country_code;
+                
+                document.getElementById('weather-loc').textContent = `${city}, ${country}`;
+                
+                // Get weather (using Open-Meteo, no API key needed)
+                const weatherRes = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${locData.latitude}&longitude=${locData.longitude}&current_weather=true`
+                );
+                const weatherData = await weatherRes.json();
+                const current = weatherData.current_weather;
+                
+                document.getElementById('weather-temp').textContent = `${Math.round(current.temperature)}°C`;
+                
+                const weatherCodes = {
+                    0: 'Clear sky',
+                    1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+                    45: 'Foggy', 48: 'Depositing rime fog',
+                    51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+                    61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+                    71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
+                    95: 'Thunderstorm'
+                };
+                document.getElementById('weather-desc').textContent = weatherCodes[current.weathercode] || 'Unknown';
+            } catch (e) {
+                document.getElementById('weather-desc').textContent = 'Unavailable';
+            }
+        }
+        loadWeather();
+        setInterval(loadWeather, 600000); // Update every 10 minutes
+    </script>
+</body>
+</html>
